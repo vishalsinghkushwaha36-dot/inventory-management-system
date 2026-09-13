@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { getTransactionHistory } from "../services/api";
+import {
+    getTransactionHistory,
+    deleteTransaction
+} from "../services/api";
 
 function TransactionHistory() {
 
@@ -10,6 +13,8 @@ function TransactionHistory() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("ALL");
+
+    const [deletingId, setDeletingId] = useState(null);
 
 
     // =========================
@@ -30,7 +35,9 @@ function TransactionHistory() {
 
             const data = await getTransactionHistory();
 
-            setTransactions(data);
+            setTransactions(
+                Array.isArray(data) ? data : []
+            );
 
         } catch (err) {
 
@@ -63,7 +70,9 @@ function TransactionHistory() {
 
             const data = await getTransactionHistory();
 
-            setTransactions(data);
+            setTransactions(
+                Array.isArray(data) ? data : []
+            );
 
         } catch (err) {
 
@@ -77,6 +86,73 @@ function TransactionHistory() {
         } finally {
 
             setRefreshing(false);
+
+        }
+
+    };
+
+
+    // =========================
+    // DELETE TRANSACTION
+    // =========================
+
+    const handleDeleteTransaction = async (transaction) => {
+
+        if (!transaction?.id) {
+            return;
+        }
+
+        const itemName =
+            transaction?.item?.name ||
+            "this item";
+
+        const transactionType =
+            transaction?.type === "STOCK_IN"
+                ? "Stock-IN"
+                : "Stock-OUT";
+
+        const quantity =
+            transaction?.quantity || 0;
+
+        const confirmed = window.confirm(
+            `Delete this transaction history record?\n\n` +
+            `Item: ${itemName}\n` +
+            `Type: ${transactionType}\n` +
+            `Quantity: ${quantity}\n\n` +
+            `This will only remove the history record.` +
+            `\nCurrent stock quantity will NOT be changed.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            setDeletingId(transaction.id);
+            setError("");
+
+            await deleteTransaction(transaction.id);
+
+            setTransactions((currentTransactions) =>
+                currentTransactions.filter(
+                    (currentTransaction) =>
+                        currentTransaction.id !== transaction.id
+                )
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+            setError(
+                err.message ||
+                "Unable to delete transaction."
+            );
+
+        } finally {
+
+            setDeletingId(null);
 
         }
 
@@ -360,7 +436,7 @@ function TransactionHistory() {
                     <div className="history-alert-content">
 
                         <strong>
-                            Unable to load history
+                            Transaction Operation Failed
                         </strong>
 
                         <span>
@@ -385,7 +461,6 @@ function TransactionHistory() {
             {!error && (
 
                 <>
-
 
                     {/* =================================================
                         SUMMARY CARDS
@@ -742,6 +817,10 @@ function TransactionHistory() {
                                             Remarks
                                         </th>
 
+                                        <th>
+                                            Action
+                                        </th>
+
                                     </tr>
 
                                     </thead>
@@ -761,6 +840,10 @@ function TransactionHistory() {
                                             const isStockIn =
                                                 transaction?.type ===
                                                 "STOCK_IN";
+
+                                            const isDeleting =
+                                                deletingId ===
+                                                transaction.id;
 
                                             return (
 
@@ -941,6 +1024,42 @@ function TransactionHistory() {
                                                             }
 
                                                         </span>
+
+                                                    </td>
+
+
+                                                    {/* ACTION */}
+
+                                                    <td>
+
+                                                        <button
+                                                            type="button"
+                                                            className="transaction-delete-button"
+                                                            onClick={() =>
+                                                                handleDeleteTransaction(
+                                                                    transaction
+                                                                )
+                                                            }
+                                                            disabled={isDeleting}
+                                                            title="Delete transaction history"
+                                                        >
+
+                                                            {isDeleting ? (
+
+                                                                <>
+                                                                    <span className="delete-spinner"></span>
+                                                                    Deleting...
+                                                                </>
+
+                                                            ) : (
+
+                                                                <>
+                                                                    🗑️ Delete
+                                                                </>
+
+                                                            )}
+
+                                                        </button>
 
                                                     </td>
 

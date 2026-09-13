@@ -54,10 +54,10 @@ public class ItemController {
                 supplierId
         );
     }
-    // =========================
-// UPDATE ITEM API
-// =========================
 
+    // =========================
+    // UPDATE ITEM API
+    // =========================
     @PutMapping("/{id}")
     public Item updateItem(
             @PathVariable Long id,
@@ -68,10 +68,10 @@ public class ItemController {
                 item
         );
     }
-    // =========================
-// DELETE ITEM API
-// =========================
 
+    // =========================
+    // DELETE ITEM API
+    // =========================
     @DeleteMapping("/{id}")
     public String deleteItem(
             @PathVariable Long id) {
@@ -122,6 +122,18 @@ public class ItemController {
     }
 
     // =========================
+    // DELETE TRANSACTION HISTORY API
+    // =========================
+    @DeleteMapping("/transactions/{id}")
+    public String deleteTransaction(
+            @PathVariable Long id) {
+
+        itemService.deleteTransaction(id);
+
+        return "Transaction deleted successfully";
+    }
+
+    // =========================
     // SEARCH ITEMS BY NAME API
     // =========================
     @GetMapping("/search")
@@ -143,7 +155,8 @@ public class ItemController {
     // CSV EXPORT API
     // =========================
     @GetMapping("/export-csv")
-    public void exportCsv(HttpServletResponse response) throws IOException {
+    public void exportCsv(HttpServletResponse response)
+            throws IOException {
 
         // Set response type as CSV
         response.setContentType("text/csv");
@@ -167,7 +180,8 @@ public class ItemController {
         // =========================
         // CSV DATA
         // =========================
-        List<Item> items = itemService.getAllItems();
+        List<Item> items =
+                itemService.getAllItems();
 
         for (Item item : items) {
 

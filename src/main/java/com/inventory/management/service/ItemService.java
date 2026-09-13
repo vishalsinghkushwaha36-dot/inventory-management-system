@@ -44,33 +44,28 @@ public class ItemService {
     // =========================
     public Item addItem(Item item) {
 
-        // Validate item object
         if (item == null) {
             throw new RuntimeException("Item data is required");
         }
 
-        // Validate SKU
         if (item.getSku() == null ||
                 item.getSku().trim().isEmpty()) {
 
             throw new RuntimeException("SKU is required");
         }
 
-        // Validate Item Name
         if (item.getName() == null ||
                 item.getName().trim().isEmpty()) {
 
             throw new RuntimeException("Item name is required");
         }
 
-        // Validate Category
         if (item.getCategory() == null ||
                 item.getCategory().trim().isEmpty()) {
 
             throw new RuntimeException("Category is required");
         }
 
-        // Validate Quantity
         if (item.getQuantity() == null ||
                 item.getQuantity() < 0) {
 
@@ -79,7 +74,6 @@ public class ItemService {
             );
         }
 
-        // Validate Threshold
         if (item.getThreshold() == null ||
                 item.getThreshold() < 0) {
 
@@ -88,7 +82,6 @@ public class ItemService {
             );
         }
 
-        // Validate Unit Price
         if (item.getUnitPrice() == null ||
                 item.getUnitPrice()
                         .compareTo(BigDecimal.ZERO) < 0) {
@@ -98,12 +91,10 @@ public class ItemService {
             );
         }
 
-        // Clean text values
         String sku = item.getSku().trim();
         String name = item.getName().trim();
         String category = item.getCategory().trim();
 
-        // Check duplicate SKU
         boolean skuExists = itemRepository.findAll()
                 .stream()
                 .anyMatch(existingItem ->
@@ -119,34 +110,29 @@ public class ItemService {
             );
         }
 
-        // Set cleaned values
         item.setSku(sku);
         item.setName(name);
         item.setCategory(category);
 
-        // Save item into MySQL database
         return itemRepository.save(item);
     }
-    // =========================
-// UPDATE EXISTING ITEM
-// =========================
 
+    // =========================
+    // UPDATE EXISTING ITEM
+    // =========================
     public Item updateItem(Long id, Item updatedItem) {
 
-        // Find existing item
         Item existingItem = itemRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Item not found")
                 );
 
-        // Validate item object
         if (updatedItem == null) {
             throw new RuntimeException(
                     "Item data is required"
             );
         }
 
-        // Validate SKU
         if (updatedItem.getSku() == null ||
                 updatedItem.getSku().trim().isEmpty()) {
 
@@ -155,7 +141,6 @@ public class ItemService {
             );
         }
 
-        // Validate Item Name
         if (updatedItem.getName() == null ||
                 updatedItem.getName().trim().isEmpty()) {
 
@@ -164,7 +149,6 @@ public class ItemService {
             );
         }
 
-        // Validate Category
         if (updatedItem.getCategory() == null ||
                 updatedItem.getCategory().trim().isEmpty()) {
 
@@ -173,7 +157,6 @@ public class ItemService {
             );
         }
 
-        // Validate Quantity
         if (updatedItem.getQuantity() == null ||
                 updatedItem.getQuantity() < 0) {
 
@@ -182,7 +165,6 @@ public class ItemService {
             );
         }
 
-        // Validate Threshold
         if (updatedItem.getThreshold() == null ||
                 updatedItem.getThreshold() < 0) {
 
@@ -191,7 +173,6 @@ public class ItemService {
             );
         }
 
-        // Validate Unit Price
         if (updatedItem.getUnitPrice() == null ||
                 updatedItem.getUnitPrice()
                         .compareTo(BigDecimal.ZERO) < 0) {
@@ -210,7 +191,6 @@ public class ItemService {
         String category =
                 updatedItem.getCategory().trim();
 
-        // Check duplicate SKU
         boolean duplicateSku =
                 itemRepository.findAll()
                         .stream()
@@ -228,7 +208,6 @@ public class ItemService {
             );
         }
 
-        // Update existing item
         existingItem.setSku(sku);
         existingItem.setName(name);
         existingItem.setCategory(category);
@@ -242,22 +221,19 @@ public class ItemService {
                 updatedItem.getUnitPrice()
         );
 
-        // Save updated item
         return itemRepository.save(existingItem);
     }
-    // =========================
-// DELETE ITEM
-// =========================
 
+    // =========================
+    // DELETE ITEM
+    // =========================
     public void deleteItem(Long id) {
 
-        // Find item
         Item item = itemRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Item not found")
                 );
 
-        // Check transaction history
         boolean hasTransactions =
                 transactionRepository.findAll()
                         .stream()
@@ -268,14 +244,12 @@ public class ItemService {
                                                 .equals(id)
                         );
 
-        // Prevent deletion if transaction history exists
         if (hasTransactions) {
             throw new RuntimeException(
                     "Cannot delete item because transaction history exists"
             );
         }
 
-        // Delete item
         itemRepository.delete(item);
     }
 
@@ -287,7 +261,6 @@ public class ItemService {
                         String remarks,
                         Long supplierId) {
 
-        // Find item by SKU
         Item item = itemRepository.findAll()
                 .stream()
                 .filter(i -> i.getSku().equals(sku))
@@ -296,28 +269,23 @@ public class ItemService {
                         new RuntimeException("Item not found")
                 );
 
-        // Validate quantity
         if (quantity == null || quantity <= 0) {
             throw new RuntimeException(
                     "Stock-IN quantity must be greater than 0"
             );
         }
 
-        // Find supplier
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() ->
                         new RuntimeException("Supplier not found")
                 );
 
-        // Increase stock
         item.setQuantity(
                 item.getQuantity() + quantity
         );
 
-        // Save updated item
         itemRepository.save(item);
 
-        // Create transaction record
         InventoryTransaction transaction =
                 new InventoryTransaction();
 
@@ -330,7 +298,6 @@ public class ItemService {
         );
         transaction.setRemarks(remarks);
 
-        // Save transaction
         transactionRepository.save(transaction);
 
         return item;
@@ -343,7 +310,6 @@ public class ItemService {
                          Integer quantity,
                          String remarks) {
 
-        // Find item by SKU
         Item item = itemRepository.findAll()
                 .stream()
                 .filter(i -> i.getSku().equals(sku))
@@ -352,29 +318,24 @@ public class ItemService {
                         new RuntimeException("Item not found")
                 );
 
-        // Validate quantity
         if (quantity == null || quantity <= 0) {
             throw new RuntimeException(
                     "Stock-OUT quantity must be greater than 0"
             );
         }
 
-        // Prevent negative stock
         if (quantity > item.getQuantity()) {
             throw new RuntimeException(
                     "Insufficient stock"
             );
         }
 
-        // Decrease stock
         item.setQuantity(
                 item.getQuantity() - quantity
         );
 
-        // Save updated item
         itemRepository.save(item);
 
-        // Create transaction record
         InventoryTransaction transaction =
                 new InventoryTransaction();
 
@@ -386,7 +347,6 @@ public class ItemService {
         );
         transaction.setRemarks(remarks);
 
-        // Save transaction
         transactionRepository.save(transaction);
 
         return item;
@@ -416,15 +376,11 @@ public class ItemService {
 
         for (Item item : itemRepository.findAll()) {
 
-            // Target stock = Threshold × 2
             int targetStock =
                     item.getThreshold() * 2;
 
-            // Generate suggestion only when
-            // current stock is below target stock
             if (item.getQuantity() < targetStock) {
 
-                // Required quantity to reach target stock
                 int reorderQuantity =
                         targetStock - item.getQuantity();
 
@@ -452,6 +408,30 @@ public class ItemService {
     }
 
     // =========================
+    // DELETE TRANSACTION HISTORY
+    // =========================
+    public void deleteTransaction(Long id) {
+
+        InventoryTransaction transaction =
+                transactionRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Transaction not found"
+                                )
+                        );
+
+        /*
+         * IMPORTANT:
+         * Deleting a transaction history record does NOT
+         * change the item's current stock quantity.
+         *
+         * This operation only removes the old history record.
+         */
+
+        transactionRepository.delete(transaction);
+    }
+
+    // =========================
     // SEARCH ITEMS BY NAME
     // =========================
     public List<Item> searchItemsByName(String name) {
@@ -473,13 +453,11 @@ public class ItemService {
         List<CategoryStockValueDTO> result =
                 new ArrayList<>();
 
-        // Get all items from database
         List<Item> items =
                 itemRepository.findAll();
 
         for (Item item : items) {
 
-            // Stock Value = Quantity × Unit Price
             BigDecimal stockValue =
                     item.getUnitPrice()
                             .multiply(
@@ -488,7 +466,6 @@ public class ItemService {
                                     )
                             );
 
-            // Check whether category already exists
             CategoryStockValueDTO existingCategory =
                     result.stream()
                             .filter(dto ->
@@ -502,8 +479,6 @@ public class ItemService {
 
             if (existingCategory != null) {
 
-                // Add current item's value
-                // to category total
                 existingCategory.setTotalStockValue(
                         existingCategory
                                 .getTotalStockValue()
@@ -512,7 +487,6 @@ public class ItemService {
 
             } else {
 
-                // Create new category entry
                 result.add(
                         new CategoryStockValueDTO(
                                 item.getCategory(),

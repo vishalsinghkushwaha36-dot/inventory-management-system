@@ -22,6 +22,12 @@ function StockTransactions({
     const [supplierId, setSupplierId] = useState("");
     const [remarks, setRemarks] = useState("");
 
+    // Search states
+    const [itemSearch, setItemSearch] = useState("");
+    const [supplierSearch, setSupplierSearch] = useState("");
+    const [showItemSearch, setShowItemSearch] = useState(false);
+    const [showSupplierSearch, setShowSupplierSearch] = useState(false);
+
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -86,12 +92,159 @@ function StockTransactions({
             setSupplierId("");
             setRemarks("");
 
+            setItemSearch(
+                `${initialItem.sku} - ${initialItem.name}`
+            );
+
+            setSupplierSearch("");
+
+            setShowItemSearch(false);
+            setShowSupplierSearch(false);
+
             setError("");
             setSuccess("");
 
         }
 
     }, [initialItem]);
+
+
+    // =========================
+    // SELECT ITEM
+    // =========================
+
+    const selectItem = (item) => {
+
+        setSku(item.sku);
+
+        setItemSearch(
+            `${item.sku} - ${item.name}`
+        );
+
+        setShowItemSearch(false);
+
+        setError("");
+        setSuccess("");
+
+    };
+
+
+    // =========================
+    // CLEAR ITEM
+    // =========================
+
+    const clearItem = () => {
+
+        setSku("");
+        setItemSearch("");
+        setShowItemSearch(false);
+
+        setError("");
+        setSuccess("");
+
+    };
+
+
+    // =========================
+    // SELECT SUPPLIER
+    // =========================
+
+    const selectSupplier = (supplier) => {
+
+        setSupplierId(String(supplier.id));
+
+        setSupplierSearch(
+            `${supplier.company} - ${supplier.name}`
+        );
+
+        setShowSupplierSearch(false);
+
+        setError("");
+        setSuccess("");
+
+    };
+
+
+    // =========================
+    // CLEAR SUPPLIER
+    // =========================
+
+    const clearSupplier = () => {
+
+        setSupplierId("");
+        setSupplierSearch("");
+        setShowSupplierSearch(false);
+
+        setError("");
+        setSuccess("");
+
+    };
+
+
+    // =========================
+    // FILTER ITEMS
+    // =========================
+
+    const filteredItems = items.filter((item) => {
+
+        const search = itemSearch
+            .trim()
+            .toLowerCase();
+
+        if (!search) {
+            return true;
+        }
+
+        return (
+            String(item.sku || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(item.name || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(item.category || "")
+                .toLowerCase()
+                .includes(search)
+        );
+
+    });
+
+
+    // =========================
+    // FILTER SUPPLIERS
+    // =========================
+
+    const filteredSuppliers = suppliers.filter((supplier) => {
+
+        const search = supplierSearch
+            .trim()
+            .toLowerCase();
+
+        if (!search) {
+            return true;
+        }
+
+        return (
+            String(supplier.company || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(supplier.name || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(supplier.email || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(supplier.contact || "")
+                .toLowerCase()
+                .includes(search)
+        );
+
+    });
 
 
     // =========================
@@ -162,8 +315,8 @@ function StockTransactions({
             }
 
 
-                // =========================
-                // STOCK-OUT
+            // =========================
+            // STOCK-OUT
             // =========================
 
             else {
@@ -207,6 +360,7 @@ function StockTransactions({
 
             setQuantity("");
             setSupplierId("");
+            setSupplierSearch("");
             setRemarks("");
 
         } catch (err) {
@@ -237,32 +391,6 @@ function StockTransactions({
 
 
     // =========================
-    // CLEAR ITEM
-    // =========================
-
-    const clearItem = () => {
-
-        setSku("");
-        setError("");
-        setSuccess("");
-
-    };
-
-
-    // =========================
-    // CLEAR SUPPLIER
-    // =========================
-
-    const clearSupplier = () => {
-
-        setSupplierId("");
-        setError("");
-        setSuccess("");
-
-    };
-
-
-    // =========================
     // TRANSACTION TYPE
     // =========================
 
@@ -276,6 +404,8 @@ function StockTransactions({
         if (type === "STOCK_OUT") {
 
             setSupplierId("");
+            setSupplierSearch("");
+            setShowSupplierSearch(false);
 
         }
 
@@ -574,53 +704,178 @@ function StockTransactions({
 
 
                     {/* =========================
-                        ITEM
+                        SEARCHABLE ITEM
                     ========================= */}
 
                     <div className="form-group">
 
-                        <label htmlFor="item">
+                        <label htmlFor="item-search">
                             Item
                         </label>
 
-                        <div className="select-with-clear">
+                        <div
+                            className="searchable-select-container"
+                            style={{
+                                position: "relative"
+                            }}
+                        >
 
-                            <select
-                                id="item"
-                                value={sku}
-                                onChange={(event) =>
-                                    setSku(event.target.value)
-                                }
+                            <div
+                                className="select-with-clear"
+                                style={{
+                                    position: "relative"
+                                }}
                             >
 
-                                <option value="">
-                                    Select Item
-                                </option>
-
-                                {items.map((item) => (
-
-                                    <option
-                                        key={item.id}
-                                        value={item.sku}
-                                    >
-                                        {item.sku} - {item.name}
-                                    </option>
-
-                                ))}
-
-                            </select>
-
-                            {sku && (
-
-                                <button
-                                    type="button"
-                                    className="clear-select-button"
-                                    onClick={clearItem}
-                                    title="Clear item selection"
-                                    aria-label="Clear item selection"
+                                <span
+                                    style={{
+                                        position: "absolute",
+                                        left: "14px",
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        fontSize: "16px",
+                                        pointerEvents: "none",
+                                        zIndex: 2
+                                    }}
                                 >
-                                    ×
-                                </button>
+                                    🔍
+                                </span>
+
+                                <input
+                                    id="item-search"
+                                    type="text"
+                                    value={itemSearch}
+                                    onChange={(event) => {
+
+                                        setItemSearch(
+                                            event.target.value
+                                        );
+
+                                        setSku("");
+
+                                        setShowItemSearch(true);
+
+                                        setError("");
+                                        setSuccess("");
+
+                                    }}
+                                    onFocus={() =>
+                                        setShowItemSearch(true)
+                                    }
+                                    placeholder="Search item by SKU, name or category..."
+                                    autoComplete="off"
+                                    style={{
+                                        width: "100%",
+                                        paddingLeft: "42px",
+                                        paddingRight: sku ? "42px" : "16px",
+                                        boxSizing: "border-box"
+                                    }}
+                                />
+
+                                {sku && (
+
+                                    <button
+                                        type="button"
+                                        className="clear-select-button"
+                                        onClick={clearItem}
+                                        title="Clear item selection"
+                                        aria-label="Clear item selection"
+                                    >
+                                        ×
+                                    </button>
+
+                                )}
+
+                            </div>
+
+
+                            {showItemSearch && (
+
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: "calc(100% + 6px)",
+                                        left: 0,
+                                        right: 0,
+                                        background: "#ffffff",
+                                        border: "1px solid #dbe3ec",
+                                        borderRadius: "12px",
+                                        boxShadow: "0 12px 30px rgba(15, 23, 42, 0.14)",
+                                        maxHeight: "260px",
+                                        overflowY: "auto",
+                                        zIndex: 1000
+                                    }}
+                                >
+
+                                    {filteredItems.length > 0 ? (
+
+                                        filteredItems.map((item) => (
+
+                                            <button
+                                                key={item.id}
+                                                type="button"
+                                                onClick={() =>
+                                                    selectItem(item)
+                                                }
+                                                style={{
+                                                    display: "block",
+                                                    width: "100%",
+                                                    border: "none",
+                                                    background: "transparent",
+                                                    textAlign: "left",
+                                                    padding: "12px 16px",
+                                                    cursor: "pointer",
+                                                    borderBottom: "1px solid #eef2f7"
+                                                }}
+                                                onMouseEnter={(event) => {
+                                                    event.currentTarget.style.background =
+                                                        "#f5f8fc";
+                                                }}
+                                                onMouseLeave={(event) => {
+                                                    event.currentTarget.style.background =
+                                                        "transparent";
+                                                }}
+                                            >
+
+                                                <div
+                                                    style={{
+                                                        fontWeight: 700,
+                                                        color: "#172033"
+                                                    }}
+                                                >
+                                                    {item.sku} - {item.name}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: "12px",
+                                                        color: "#64748b",
+                                                        marginTop: "3px"
+                                                    }}
+                                                >
+                                                    {item.category} • Stock: {item.quantity}
+                                                </div>
+
+                                            </button>
+
+                                        ))
+
+                                    ) : (
+
+                                        <div
+                                            style={{
+                                                padding: "18px",
+                                                textAlign: "center",
+                                                color: "#64748b",
+                                                fontSize: "14px"
+                                            }}
+                                        >
+                                            No matching items found
+                                        </div>
+
+                                    )}
+
+                                </div>
 
                             )}
 
@@ -716,60 +971,180 @@ function StockTransactions({
 
 
                     {/* =========================
-                        SUPPLIER
+                        SEARCHABLE SUPPLIER
                     ========================= */}
 
                     {transactionType === "STOCK_IN" && (
 
                         <div className="form-group">
 
-                            <label htmlFor="supplier">
+                            <label htmlFor="supplier-search">
                                 Supplier
                             </label>
 
-                            <div className="select-with-clear">
+                            <div
+                                className="searchable-select-container"
+                                style={{
+                                    position: "relative"
+                                }}
+                            >
 
-                                <select
-                                    id="supplier"
-                                    value={supplierId}
-                                    onChange={(event) =>
-                                        setSupplierId(
-                                            event.target.value
-                                        )
-                                    }
+                                <div
+                                    className="select-with-clear"
+                                    style={{
+                                        position: "relative"
+                                    }}
                                 >
 
-                                    <option value="">
-                                        Select Supplier
-                                    </option>
-
-                                    {suppliers.map((supplier) => (
-
-                                        <option
-                                            key={supplier.id}
-                                            value={supplier.id}
-                                        >
-
-                                            {supplier.company} -{" "}
-                                            {supplier.name}
-
-                                        </option>
-
-                                    ))}
-
-                                </select>
-
-                                {supplierId && (
-
-                                    <button
-                                        type="button"
-                                        className="clear-select-button"
-                                        onClick={clearSupplier}
-                                        title="Clear supplier selection"
-                                        aria-label="Clear supplier selection"
+                                    <span
+                                        style={{
+                                            position: "absolute",
+                                            left: "14px",
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            fontSize: "16px",
+                                            pointerEvents: "none",
+                                            zIndex: 2
+                                        }}
                                     >
-                                        ×
-                                    </button>
+                                        🔍
+                                    </span>
+
+                                    <input
+                                        id="supplier-search"
+                                        type="text"
+                                        value={supplierSearch}
+                                        onChange={(event) => {
+
+                                            setSupplierSearch(
+                                                event.target.value
+                                            );
+
+                                            setSupplierId("");
+
+                                            setShowSupplierSearch(true);
+
+                                            setError("");
+                                            setSuccess("");
+
+                                        }}
+                                        onFocus={() =>
+                                            setShowSupplierSearch(true)
+                                        }
+                                        placeholder="Search supplier by company or name..."
+                                        autoComplete="off"
+                                        style={{
+                                            width: "100%",
+                                            paddingLeft: "42px",
+                                            paddingRight: supplierId ? "42px" : "16px",
+                                            boxSizing: "border-box"
+                                        }}
+                                    />
+
+                                    {supplierId && (
+
+                                        <button
+                                            type="button"
+                                            className="clear-select-button"
+                                            onClick={clearSupplier}
+                                            title="Clear supplier selection"
+                                            aria-label="Clear supplier selection"
+                                        >
+                                            ×
+                                        </button>
+
+                                    )}
+
+                                </div>
+
+
+                                {showSupplierSearch && (
+
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: "calc(100% + 6px)",
+                                            left: 0,
+                                            right: 0,
+                                            background: "#ffffff",
+                                            border: "1px solid #dbe3ec",
+                                            borderRadius: "12px",
+                                            boxShadow: "0 12px 30px rgba(15, 23, 42, 0.14)",
+                                            maxHeight: "260px",
+                                            overflowY: "auto",
+                                            zIndex: 1000
+                                        }}
+                                    >
+
+                                        {filteredSuppliers.length > 0 ? (
+
+                                            filteredSuppliers.map((supplier) => (
+
+                                                <button
+                                                    key={supplier.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        selectSupplier(supplier)
+                                                    }
+                                                    style={{
+                                                        display: "block",
+                                                        width: "100%",
+                                                        border: "none",
+                                                        background: "transparent",
+                                                        textAlign: "left",
+                                                        padding: "12px 16px",
+                                                        cursor: "pointer",
+                                                        borderBottom: "1px solid #eef2f7"
+                                                    }}
+                                                    onMouseEnter={(event) => {
+                                                        event.currentTarget.style.background =
+                                                            "#f5f8fc";
+                                                    }}
+                                                    onMouseLeave={(event) => {
+                                                        event.currentTarget.style.background =
+                                                            "transparent";
+                                                    }}
+                                                >
+
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 700,
+                                                            color: "#172033"
+                                                        }}
+                                                    >
+                                                        {supplier.company} - {supplier.name}
+                                                    </div>
+
+                                                    <div
+                                                        style={{
+                                                            fontSize: "12px",
+                                                            color: "#64748b",
+                                                            marginTop: "3px"
+                                                        }}
+                                                    >
+                                                        {supplier.contact} • {supplier.email}
+                                                    </div>
+
+                                                </button>
+
+                                            ))
+
+                                        ) : (
+
+                                            <div
+                                                style={{
+                                                    padding: "18px",
+                                                    textAlign: "center",
+                                                    color: "#64748b",
+                                                    fontSize: "14px"
+                                                }}
+                                            >
+                                                No matching suppliers found
+                                            </div>
+
+                                        )}
+
+                                    </div>
 
                                 )}
 

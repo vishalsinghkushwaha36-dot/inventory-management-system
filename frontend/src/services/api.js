@@ -18,7 +18,6 @@ const parseResponse = async (response) => {
     }
 };
 
-
 const getErrorMessage = (data, fallbackMessage) => {
     if (typeof data === "string" && data.trim()) {
         return data;
@@ -35,11 +34,9 @@ const getErrorMessage = (data, fallbackMessage) => {
     return fallbackMessage;
 };
 
-
 /* =========================================================
    ITEMS
    ========================================================= */
-
 
 /* =========================
    GET ALL ITEMS
@@ -67,7 +64,6 @@ export const getItems = async () => {
         ? data
         : [];
 };
-
 
 /* =========================
    ADD NEW ITEM
@@ -103,7 +99,6 @@ export const addItem = async (item) => {
 
     return data;
 };
-
 
 /* =========================
    UPDATE ITEM
@@ -143,7 +138,6 @@ export const updateItem = async (
     return data;
 };
 
-
 /* =========================
    DELETE ITEM
    ========================= */
@@ -172,11 +166,9 @@ export const deleteItem = async (id) => {
     return data;
 };
 
-
 /* =========================================================
    SUPPLIERS
    ========================================================= */
-
 
 /* =========================
    GET ALL SUPPLIERS
@@ -204,7 +196,6 @@ export const getSuppliers = async () => {
         ? data
         : [];
 };
-
 
 /* =========================
    ADD SUPPLIER
@@ -242,7 +233,6 @@ export const addSupplier = async (
 
     return data;
 };
-
 
 /* =========================
    UPDATE SUPPLIER
@@ -282,7 +272,6 @@ export const updateSupplier = async (
     return data;
 };
 
-
 /* =========================
    DELETE SUPPLIER
    ========================= */
@@ -313,11 +302,9 @@ export const deleteSupplier = async (
     return data;
 };
 
-
 /* =========================================================
    STOCK TRANSACTIONS
    ========================================================= */
-
 
 /* =========================
    STOCK-IN
@@ -390,7 +377,6 @@ export const stockIn = async (
     return data;
 };
 
-
 /* =========================
    STOCK-OUT
    ========================= */
@@ -447,11 +433,9 @@ export const stockOut = async (
     return data;
 };
 
-
 /* =========================================================
    TRANSACTION HISTORY
    ========================================================= */
-
 
 /* =========================
    GET TRANSACTION HISTORY
@@ -481,11 +465,38 @@ export const getTransactionHistory =
             : [];
     };
 
+/* =========================
+   DELETE TRANSACTION HISTORY
+   ========================= */
+
+export const deleteTransaction =
+    async (id) => {
+
+        const response = await fetch(
+            `${API_BASE_URL}/items/transactions/${id}`,
+            {
+                method: "DELETE",
+            }
+        );
+
+        const data =
+            await parseResponse(response);
+
+        if (!response.ok) {
+            throw new Error(
+                getErrorMessage(
+                    data,
+                    "Failed to delete transaction"
+                )
+            );
+        }
+
+        return data;
+    };
 
 /* =========================================================
    LOW STOCK
    ========================================================= */
-
 
 /* =========================
    GET LOW STOCK ITEMS
@@ -515,11 +526,9 @@ export const getLowStockItems =
             : [];
     };
 
-
 /* =========================================================
    REORDER SUGGESTIONS
    ========================================================= */
-
 
 /* =========================
    GET REORDER SUGGESTIONS
@@ -549,11 +558,9 @@ export const getReorderSuggestions =
             : [];
     };
 
-
 /* =========================================================
    SEARCH & FILTER
    ========================================================= */
-
 
 /* =========================
    SEARCH ITEMS BY NAME
@@ -592,7 +599,6 @@ export const searchItems = async (
         : [];
 };
 
-
 /* =========================
    FILTER ITEMS BY CATEGORY
    ========================= */
@@ -629,11 +635,9 @@ export const getItemsByCategory =
             : [];
     };
 
-
 /* =========================================================
    CATEGORY STOCK VALUE
    ========================================================= */
-
 
 /* =========================
    GET CATEGORY STOCK VALUE
@@ -663,11 +667,9 @@ export const getCategoryStockValue =
             : [];
     };
 
-
 /* =========================================================
    CSV EXPORT
    ========================================================= */
-
 
 /* =========================
    EXPORT INVENTORY CSV
