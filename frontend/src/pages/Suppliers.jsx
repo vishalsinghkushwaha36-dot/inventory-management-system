@@ -23,6 +23,13 @@ function Suppliers() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    // =========================
+    // RENDER BACKEND API
+    // =========================
+
+    const API_BASE_URL =
+        "https://inventory-management-backend-17pi.onrender.com/api";
+
     useEffect(() => {
         loadSuppliers();
     }, []);
@@ -133,8 +140,8 @@ function Suppliers() {
                 editingId !== null;
 
             const url = isEditing
-                ? `http://localhost:8080/api/suppliers/${editingId}`
-                : "http://localhost:8080/api/suppliers";
+                ? `${API_BASE_URL}/suppliers/${editingId}`
+                : `${API_BASE_URL}/suppliers`;
 
             const method = isEditing
                 ? "PUT"
@@ -144,9 +151,12 @@ function Suppliers() {
                 url,
                 {
                     method: method,
+
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
+
                     body: JSON.stringify({
                         name: name.trim(),
                         company: company.trim(),
@@ -157,17 +167,26 @@ function Suppliers() {
             );
 
             const contentType =
-                response.headers.get("content-type");
+                response.headers.get(
+                    "content-type"
+                );
 
             let data;
 
             if (
                 contentType &&
-                contentType.includes("application/json")
+                contentType.includes(
+                    "application/json"
+                )
             ) {
-                data = await response.json();
+
+                data =
+                    await response.json();
+
             } else {
-                data = await response.text();
+
+                data =
+                    await response.text();
             }
 
             if (!response.ok) {
@@ -175,6 +194,7 @@ function Suppliers() {
                 throw new Error(
                     typeof data === "object"
                         ? data.message ||
+                        data.error ||
                         "Unable to save supplier."
                         : data ||
                         "Unable to save supplier."
@@ -250,9 +270,10 @@ function Suppliers() {
         setError("");
         setSuccess("");
 
-        const confirmed = window.confirm(
-            `Are you sure you want to delete supplier "${supplier.name}"?`
-        );
+        const confirmed =
+            window.confirm(
+                `Are you sure you want to delete supplier "${supplier.name}"?`
+            );
 
         if (!confirmed) {
             return;
@@ -262,25 +283,35 @@ function Suppliers() {
 
             setDeletingId(supplier.id);
 
-            const response = await fetch(
-                `http://localhost:8080/api/suppliers/${supplier.id}`,
-                {
-                    method: "DELETE"
-                }
-            );
+            const response =
+                await fetch(
+                    `${API_BASE_URL}/suppliers/${supplier.id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
 
             const contentType =
-                response.headers.get("content-type");
+                response.headers.get(
+                    "content-type"
+                );
 
             let data;
 
             if (
                 contentType &&
-                contentType.includes("application/json")
+                contentType.includes(
+                    "application/json"
+                )
             ) {
-                data = await response.json();
+
+                data =
+                    await response.json();
+
             } else {
-                data = await response.text();
+
+                data =
+                    await response.text();
             }
 
             if (!response.ok) {
@@ -288,6 +319,7 @@ function Suppliers() {
                 throw new Error(
                     typeof data === "object"
                         ? data.message ||
+                        data.error ||
                         "Unable to delete supplier."
                         : data ||
                         "Unable to delete supplier."
@@ -299,7 +331,10 @@ function Suppliers() {
             );
 
             // If deleted supplier was being edited
-            if (editingId === supplier.id) {
+            if (
+                editingId ===
+                supplier.id
+            ) {
                 clearForm();
             }
 
@@ -346,13 +381,13 @@ function Suppliers() {
                      ${supplier.email || ""}`
                         .toLowerCase();
 
-                return searchableText.includes(search);
-
+                return searchableText.includes(
+                    search
+                );
             }
         );
 
     }, [suppliers, searchTerm]);
-
 
     // =========================
     // LOADING
@@ -385,11 +420,8 @@ function Suppliers() {
                 </div>
 
             </div>
-
         );
-
     }
-
 
     return (
 
@@ -422,7 +454,6 @@ function Suppliers() {
 
             </div>
 
-
             {/* =========================
                 MESSAGES
             ========================= */}
@@ -442,7 +473,6 @@ function Suppliers() {
                 </div>
 
             )}
-
 
             {/* =========================
                 SUMMARY
@@ -470,7 +500,6 @@ function Suppliers() {
 
                 </div>
 
-
                 <div className="supplier-summary-card">
 
                     <div className="supplier-summary-icon green">
@@ -490,7 +519,6 @@ function Suppliers() {
                     </div>
 
                 </div>
-
 
                 <div className="supplier-summary-card">
 
@@ -513,7 +541,6 @@ function Suppliers() {
                 </div>
 
             </section>
-
 
             {/* =========================
                 ADD / EDIT SUPPLIER
@@ -541,7 +568,6 @@ function Suppliers() {
 
                 </div>
 
-
                 <form
                     className="supplier-form"
                     onSubmit={handleSubmit}
@@ -560,13 +586,14 @@ function Suppliers() {
                             type="text"
                             value={name}
                             onChange={(event) =>
-                                setName(event.target.value)
+                                setName(
+                                    event.target.value
+                                )
                             }
                             placeholder="Enter supplier name"
                         />
 
                     </div>
-
 
                     {/* COMPANY */}
 
@@ -581,13 +608,14 @@ function Suppliers() {
                             type="text"
                             value={company}
                             onChange={(event) =>
-                                setCompany(event.target.value)
+                                setCompany(
+                                    event.target.value
+                                )
                             }
                             placeholder="Enter company name"
                         />
 
                     </div>
-
 
                     {/* CONTACT */}
 
@@ -602,13 +630,14 @@ function Suppliers() {
                             type="tel"
                             value={contact}
                             onChange={(event) =>
-                                setContact(event.target.value)
+                                setContact(
+                                    event.target.value
+                                )
                             }
                             placeholder="Enter contact number"
                         />
 
                     </div>
-
 
                     {/* EMAIL */}
 
@@ -623,13 +652,14 @@ function Suppliers() {
                             type="email"
                             value={email}
                             onChange={(event) =>
-                                setEmail(event.target.value)
+                                setEmail(
+                                    event.target.value
+                                )
                             }
                             placeholder="supplier@example.com"
                         />
 
                     </div>
-
 
                     {/* FORM ACTIONS */}
 
@@ -653,13 +683,14 @@ function Suppliers() {
 
                         </button>
 
-
                         {editingId !== null && (
 
                             <button
                                 type="button"
                                 className="refresh-button"
-                                onClick={handleCancelEdit}
+                                onClick={
+                                    handleCancelEdit
+                                }
                                 disabled={submitting}
                             >
                                 × Cancel Edit
@@ -672,7 +703,6 @@ function Suppliers() {
                 </form>
 
             </section>
-
 
             {/* =========================
                 SUPPLIER LIST
@@ -706,7 +736,6 @@ function Suppliers() {
                     </div>
 
                 </div>
-
 
                 {/* SEARCH */}
 
@@ -742,7 +771,6 @@ function Suppliers() {
                     )}
 
                 </div>
-
 
                 {/* EMPTY STATE */}
 
@@ -806,7 +834,6 @@ function Suppliers() {
 
                             </thead>
 
-
                             <tbody>
 
                             {filteredSuppliers.map(
@@ -825,7 +852,6 @@ function Suppliers() {
                                             </span>
 
                                         </td>
-
 
                                         {/* SUPPLIER */}
 
@@ -853,7 +879,6 @@ function Suppliers() {
 
                                         </td>
 
-
                                         {/* COMPANY */}
 
                                         <td>
@@ -863,7 +888,6 @@ function Suppliers() {
                                             </span>
 
                                         </td>
-
 
                                         {/* CONTACT */}
 
@@ -875,7 +899,6 @@ function Suppliers() {
 
                                         </td>
 
-
                                         {/* EMAIL */}
 
                                         <td>
@@ -886,20 +909,22 @@ function Suppliers() {
 
                                         </td>
 
-
                                         {/* STATUS */}
 
                                         <td>
 
                                             <span className="supplier-status-badge">
-                                                <span className="status-dot"></span>
+
+                                                <span className="status-dot">
+                                                </span>
+
                                                 Active
+
                                             </span>
 
                                         </td>
 
-
-                                        {/* PREMIUM ACTIONS */}
+                                        {/* ACTIONS */}
 
                                         <td>
 
@@ -920,7 +945,9 @@ function Suppliers() {
                                                         supplier.id
                                                     }
                                                     title="Edit Supplier"
-                                                    aria-label={`Edit ${supplier.name}`}
+                                                    aria-label={
+                                                        `Edit ${supplier.name}`
+                                                    }
                                                 >
 
                                                     <span className="action-icon">
@@ -928,7 +955,6 @@ function Suppliers() {
                                                     </span>
 
                                                 </button>
-
 
                                                 {/* DELETE */}
 
@@ -945,13 +971,16 @@ function Suppliers() {
                                                         supplier.id
                                                     }
                                                     title="Delete Supplier"
-                                                    aria-label={`Delete ${supplier.name}`}
+                                                    aria-label={
+                                                        `Delete ${supplier.name}`
+                                                    }
                                                 >
 
                                                     {deletingId ===
                                                     supplier.id ? (
 
-                                                        <span className="action-spinner"></span>
+                                                        <span className="action-spinner">
+                                                        </span>
 
                                                     ) : (
 
@@ -968,7 +997,6 @@ function Suppliers() {
                                         </td>
 
                                     </tr>
-
                                 )
                             )}
 
@@ -983,7 +1011,6 @@ function Suppliers() {
             </section>
 
         </div>
-
     );
 }
 
