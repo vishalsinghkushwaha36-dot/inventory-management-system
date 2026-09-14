@@ -56,83 +56,93 @@ function Dashboard({
 
     /* =========================================================
        LOAD DASHBOARD DATA
+       FAST / NON-BLOCKING LOADING
        ========================================================= */
 
     const loadDashboardData = async () => {
 
-        try {
+        // Do not block the dashboard UI while Render APIs respond.
+        // Existing data remains visible during refresh.
+        setLoading(false);
+        setError("");
 
-            setLoading(true);
-            setError("");
+        // Start all dashboard requests together so network latency
+        // is not accumulated one request after another.
+        const results = await Promise.allSettled([
+            getItems(),
+            getTransactionHistory(),
+            getLowStockItems(),
+        ]);
 
-            const [
-                itemsResponse,
-                transactionsResponse,
-                lowStockResponse,
-            ] = await Promise.all([
-                getItems(),
-                getTransactionHistory(),
-                getLowStockItems(),
-            ]);
+        const [
+            itemsResult,
+            transactionsResult,
+            lowStockResult,
+        ] = results;
+
+        // Inventory data
+        if (itemsResult.status === "fulfilled") {
 
             setItems(
-                Array.isArray(itemsResponse)
-                    ? itemsResponse
+                Array.isArray(itemsResult.value)
+                    ? itemsResult.value
                     : []
             );
 
-            setTransactions(
-                Array.isArray(transactionsResponse)
-                    ? transactionsResponse
-                    : []
-            );
-
-            setLowStockItems(
-                Array.isArray(lowStockResponse)
-                    ? lowStockResponse
-                    : []
-            );
-
-        } catch (err) {
+        } else {
 
             console.error(
-                "Dashboard loading error:",
-                err
+                "Dashboard items loading error:",
+                itemsResult.reason
+            );
+        }
+
+        // Transaction data
+        if (transactionsResult.status === "fulfilled") {
+
+            setTransactions(
+                Array.isArray(transactionsResult.value)
+                    ? transactionsResult.value
+                    : []
             );
 
-            const backendMessage =
-                err?.response?.data?.message ||
-                err?.response?.data;
+        } else {
+
+            console.error(
+                "Dashboard transactions loading error:",
+                transactionsResult.reason
+            );
+        }
+
+        // Low-stock data
+        if (lowStockResult.status === "fulfilled") {
+
+            setLowStockItems(
+                Array.isArray(lowStockResult.value)
+                    ? lowStockResult.value
+                    : []
+            );
+
+        } else {
+
+            console.error(
+                "Dashboard low-stock loading error:",
+                lowStockResult.reason
+            );
+        }
+
+        // Only show an error when every dashboard request fails.
+        // A single failed section should not hide the whole dashboard.
+        const allRequestsFailed =
+            results.every(
+                (result) => result.status === "rejected"
+            );
+
+        if (allRequestsFailed) {
 
             setError(
-                typeof backendMessage === "string"
-                    ? backendMessage
-                    : err?.message ||
-                    "Unable to load dashboard data."
+                "Unable to load dashboard data. Please refresh."
             );
-
-            try {
-
-                const fallbackItems =
-                    await getItems();
-
-                setItems(
-                    Array.isArray(fallbackItems)
-                        ? fallbackItems
-                        : []
-                );
-
-            } catch (fallbackError) {
-
-                console.error(
-                    "Dashboard fallback error:",
-                    fallbackError
-                );
-            }
-
-        } finally {
-
-            setLoading(false);
         }
     };
 
